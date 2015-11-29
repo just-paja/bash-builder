@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+export FILE_MAIN="scripts/run.sh"
+export VERSION="0.1.0"
