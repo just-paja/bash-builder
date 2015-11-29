@@ -12,7 +12,7 @@ export ARCHIVE_MARK_TEMPLATE="###--[:archive:{type}:{path}:]--"
 ###
 function get_file_type {
   path="$1"
-  info=$(file -b "${path}" | grep "ASCII text" | wc -l)
+  info=$(file -b --mime-type "${path}" | grep "text/" | wc -l)
 
   if [ "$?" != "0" ]; then
     return $?
