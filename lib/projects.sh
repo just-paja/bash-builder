@@ -75,10 +75,16 @@ function get_project_tmp_dir {
 }
 
 function get_project_target {
-  root=$(get_project_root "$1")
-  . ${root}/meta
+  project_root=$(get_project_root "$1")
+  root=$(get_root)
+  target=$root/target
+  . ${project_root}/meta
 
-  echo "${DIR_ROOT}/target/${1}-${VERSION}.sh"
+  if [ ! -e ${target} ]; then
+    mkdir ${target}
+  fi
+
+  echo "${target}/${1}-${VERSION}.sh"
 }
 
 function project_exists {
