@@ -98,7 +98,7 @@ function project_build {
   DIR_REPO=$(get_root)
   DIR_TMP_PROJECT=$(get_project_tmp_dir "${project}")
   DIR_INLINE_GLOBAL="${DIR_ROOT}/inline"
-  DIR_INLINE_REPO="${repo}/inline"
+  DIR_INLINE_REPO="${DIR_REPO}/inline"
   DIR_INLINE_LOCAL="${DIR_SRC}"
   DIR_INLINE_SRC="${DIR_TMP_PROJECT}/inline"
 

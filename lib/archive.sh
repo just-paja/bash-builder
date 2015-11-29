@@ -69,6 +69,7 @@ function create_inline_source {
 
   for src in $sources; do
     if [ -d ${src} ]; then
+      echo ":: Inlining ${src}"
       cp -R ${src}/* "${DIR_BINARY}"
     fi
   done
