@@ -124,6 +124,7 @@ function project_build {
       type=$(file -b --mime-type ${file})
     fi
 
+    echo >> ${FILE_TARGET}
     get_archive_mark "${type}" "${path}" >> ${FILE_TARGET}
     cat ${file} >> ${FILE_TARGET}
   done
