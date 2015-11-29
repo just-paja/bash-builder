@@ -1,0 +1,173 @@
+#!/bin/bash
+
+BUILD=()
+BUILD_CLEAN="0"
+BUILD_KEEP="0"
+BUILD_RUN="0"
+BUILD_SERVE=""
+
+PATH_SSH_KEY=""
+
+DIR_CWD=$(dirname "${BASH_SOURCE[0]}")
+DIR_ROOT=$( cd "${DIR_CWD}" && pwd )
+
+function task_usage {
+  echo $(basename "$0") "[-a|--all] [-c|--clean] [-h|--help] [-i|--ident] [-l|--list] [-o|--on]"
+  echo
+  echo " Utility capable of building all helper install scripts."
+  echo
+  echo " -a|--all   Build all"
+  echo " -c|--clean Run only clean, no build"
+  echo " -h|--help  Show usage (this)"
+  echo " -i|--ident Identity file path"
+  echo " -l|--list  List all available"
+  echo " -o|--on    Try to ssh to a machine and run the built script there"
+  echo " -r|--run   Also run the script. Pass all arguments to it."
+  echo
+  echo " Examples:"
+  echo " ./build selenium -i test.pem -o ec2-user@ec-82.23.24.21.amazonaws.com"
+  echo
+}
+
+
+. ${DIR_ROOT}/lib/archive.sh
+. ${DIR_ROOT}/lib/tasks.sh
+. ${DIR_ROOT}/lib/projects.sh
+
+if [ "$#" -eq 0 ]; then
+  task_usage
+  exit 0
+fi
+
+PARAMS=$(getopt -n $0 -o "achi:klo:r" --long "all,clean,help,ident:,keep,list,on:,run" -- "$@")
+
+if [ $? != 0 ]; then
+  exit 3;
+fi
+
+while true; do
+  case "$1" in
+    -a|--all)
+      BUILD=($(get_all_projects))
+      shift
+    ;;
+
+    -c|--clean)
+      BUILD_CLEAN="1"
+      shift
+    ;;
+
+    -h|--help)
+      task_usage
+      shift
+      exit 0
+    ;;
+
+    -i|--ident)
+      PATH_SSH_KEY="$2"
+      shift 2
+    ;;
+
+    -k|--keep)
+      BUILD_KEEP="1"
+      shift
+    ;;
+
+    -l|--list)
+      get_all_projects
+      shift
+      exit 0
+    ;;
+
+    -o|--on)
+      BUILD_SERVE="$2"
+      shift 2;
+    ;;
+
+    -r|--run)
+      BUILD_RUN="1"
+      shift
+    ;;
+
+    --)
+      shift
+      break
+    ;;
+
+    *)
+      if [ "$1" == "" ]; then
+        break
+      fi
+
+      BUILD+=($1)
+      shift
+    ;;
+  esac
+done
+
+if [ "${#BUILD[@]}" == "0" ]; then
+  echo "No build target" 1>&2
+  exit 4
+fi
+
+if [ "${BUILD_RUN}" == "1" ]; then
+  if [ "${BUILD_CLEAN}" == "1" ]; then
+    echo "Cannot combine --clean and --run flags." 1>&2
+    exit 5
+  fi
+
+  if [ "${#BUILD[@]}" -gt 1 ]; then
+    echo "Cannot build more than one target with --run flag"
+    exit 6
+  fi
+
+  if [ "${BUILD_SERVE}" != "" ]; then
+    echo "Cannot run locally and on server. Choose either."
+    exit 7
+  fi
+fi
+
+
+for project in ${BUILD[@]}; do
+  if [ $(project_exists ${project}) != "1" ]; then
+    echo "Project ${project} does not exist" 1>&2
+    exit 8
+  else
+    run_task project_clean "${project}"
+
+    if [ "${BUILD_CLEAN}" != "0" ]; then
+      exit $?
+    fi
+
+    echo ":: Building ${project}"
+    run_task project_build "${project}"
+    get_project_target "${project}"
+
+
+    if [ "${BUILD_KEEP}" == "0" ]; then
+      run_task project_clean_tmp "${project}"
+    fi
+
+
+    if [ "${BUILD_RUN}" == "1" ]; then
+      echo ":: Running ${project}"
+      target=$(get_project_target "${project}")
+      ${target}
+    fi
+
+    if [ "${BUILD_SERVE}" != "" ]; then
+      echo ":: Running ${project} on remote"
+      target=$(get_project_target "${project}")
+      name=$(basename ${target})
+      dest="/var/tmp/${name}"
+
+      scp -i "${PATH_SSH_KEY}" ${target} "${BUILD_SERVE}:${dest}"
+      ssh -t -i "${PATH_SSH_KEY}" "${BUILD_SERVE}" "${dest}"
+
+      if [ "${PATH_SSH_KEY}" == "" ]; then
+        echo "SSH key was not specified."
+      fi
+    fi
+  fi
+done
+
