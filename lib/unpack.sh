@@ -90,8 +90,8 @@ fi
 # Import file main var
 . ${FILE_META}
 
-if [ -e ${DIR_INLINE}/lib/bash-builder/pre-run-vars.sh ]; then
-  . ${DIR_INLINE}/lib/bash-builder/pre-run.sh
+if [ -e ${DIR_HOME}/pre-run.sh ]; then
+  ${DIR_HOME}/pre-run.sh
 fi
 
 # Run the composed script
