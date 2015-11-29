@@ -8,8 +8,7 @@ BUILD_SERVE=""
 
 PATH_SSH_KEY=""
 
-DIR_CWD=$(dirname "${BASH_SOURCE[0]}")
-DIR_ROOT=$( cd "${DIR_CWD}" && pwd )
+DIR_ROOT="$(dirname "$(readlink -f "$0")")"
 
 function task_usage {
   echo $(basename "$0") "[-a|--all] [-c|--clean] [-h|--help] [-i|--ident] [-l|--list] [-o|--on]"
