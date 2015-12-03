@@ -91,6 +91,28 @@ function project_exists {
   find_project_root "$1" | wc -l
 }
 
+function get_projejct_deps {
+  root=$(get_project_root $1)
+  . ${root}/meta
+
+  echo "${REQUIRE_PROJECTS}"
+}
+
+
+function project_collect_inlines {
+  project="$1"
+
+  DIR_SRC=$(get_project_root "${project}")
+  DIR_REPO=$(get_root)
+  DIR_TMP_PROJECT=$(get_project_tmp_dir "${project}")
+  DIR_INLINE_GLOBAL="${DIR_ROOT}/inline"
+  DIR_INLINE_REPO="${DIR_REPO}/inline"
+  DIR_INLINE_LOCAL="${DIR_SRC}"
+  DIR_INLINE_SRC="${DIR_TMP_PROJECT}/inline"
+
+  run_task create_inline_source "${DIR_INLINE_SRC}" "${DIR_INLINE_GLOBAL}" "${DIR_INLINE_REPO}" "${DIR_INLINE_LOCAL}"
+}
+
 function project_build {
   project="$1"
 
@@ -108,7 +130,6 @@ function project_build {
   FILE_UNPACK="${DIR_LIB}/unpack.sh"
 
   run_task mkdir -p ${DIR_TARGET}
-  run_task create_inline_source "${DIR_INLINE_SRC}" "${DIR_INLINE_GLOBAL}" "${DIR_INLINE_REPO}" "${DIR_INLINE_LOCAL}"
 
   cat ${FILE_TASKS} > ${FILE_TARGET}
   cat ${FILE_UNPACK} >> ${FILE_TARGET}

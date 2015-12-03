@@ -10,6 +10,9 @@ PATH_SSH_KEY=""
 
 DIR_ROOT="$(dirname "$(readlink -f "$0")")"
 
+TAKE_ARGS="0"
+PASS_ARGS=()
+
 function task_usage {
   echo $(basename "$0") "[-a|--all] [-c|--clean] [-h|--help] [-i|--ident] [-l|--list] [-o|--on]"
   echo
@@ -20,6 +23,7 @@ function task_usage {
   echo " -h|--help  Show usage (this)"
   echo " -i|--ident Identity file path"
   echo " -l|--list  List all available"
+  echo " -k|--keep  Keep temporary files"
   echo " -o|--on    Try to ssh to a machine and run the built script there"
   echo " -r|--run   Also run the script. Pass all arguments to it."
   echo " -w|--work  Tells bash builder to work here."
@@ -96,8 +100,8 @@ while true; do
     ;;
 
     --)
+      TAKE_ARGS="1"
       shift
-      break
     ;;
 
     *)
@@ -105,7 +109,11 @@ while true; do
         break
       fi
 
-      BUILD+=($1)
+      if [ "${TAKE_ARGS}" == "0" ]; then
+        BUILD+=($1)
+      else
+        PASS_ARGS+=("$1")
+      fi
       shift
     ;;
   esac
@@ -145,7 +153,25 @@ for project in ${BUILD[@]}; do
       exit $?
     fi
 
-    echo ":: Building ${project}"
+    DEPS=$(get_projejct_deps "${project}")
+
+    echo ">> Building dependencies for ${project}"
+    project_collect_inlines ${project}
+
+    if [ "${DEPS}" != "" ]; then
+      tmpdir=$(get_project_tmp_dir "${project}")
+      tmpdir="${tmpdir}/inline"
+
+      if [ ! -d ${tmpdir} ]; then
+        mkdir -p ${tmpdir}
+      fi
+
+      for dep in ${DEPS}; do
+        ${DIR_ROOT}/bash-builder -r ${dep} -- $tmpdir
+      done
+    fi
+
+    echo ">> Building ${project}"
     run_task project_build "${project}"
     get_project_target "${project}"
 
@@ -158,7 +184,7 @@ for project in ${BUILD[@]}; do
     if [ "${BUILD_RUN}" == "1" ]; then
       echo ":: Running ${project}"
       target=$(get_project_target "${project}")
-      ${target}
+      ${target} ${PASS_ARGS[@]}
     fi
 
     if [ "${BUILD_SERVE}" != "" ]; then
