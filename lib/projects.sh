@@ -36,7 +36,7 @@ function get_all_projects {
   src=$(get_all_project_sources)
 
   for dir in ${src}; do
-    find ${dir} -mindepth 1 -maxdepth 1 -type d -printf "%f\n"
+    find ${dir} -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort
   done
 }
 
