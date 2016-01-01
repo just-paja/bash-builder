@@ -52,6 +52,7 @@ export SCRIPT_FILE=$(basename "$0")
 export SCRIPT_NAME=${SCRIPT_FILE%.*}
 
 export DIR_EXTRACT="/var/tmp/bash-builder/bash/${SCRIPT_NAME}"
+export DIR_EXTRACT=$(mktemp)
 export DIR_HOME="${DIR_EXTRACT}/inline"
 
 DIR_INLINE="${DIR_EXTRACT}/inline"
@@ -109,4 +110,7 @@ fi
 
 # Run the composed script
 "${DIR_EXTRACT}/inline/${FILE_MAIN}" $@
+result=$?
+
+run_task rm -rf ${DIR_EXTRACT}
 exit $?
