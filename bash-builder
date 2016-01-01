@@ -224,9 +224,14 @@ for project in ${BUILD[@]}; do
       target=$(get_project_target "${project}")
       name=$(basename ${target})
       dest="/var/tmp/${name}"
+      key=""
 
-      scp -i "${PATH_SSH_KEY}" ${target} "${BUILD_SERVE}:${dest}"
-      ssh -t -i "${PATH_SSH_KEY}" "${BUILD_SERVE}" "${dest}"
+      if [ "${PATH_SSH_KEY}" != "" ]; then
+        key="-i ${PATH_SSH_KEY}"
+      fi
+
+      scp ${key} ${target} "${BUILD_SERVE}:${dest}"
+      ssh -t ${key} "${BUILD_SERVE}" "${dest}"
 
       if [ "${PATH_SSH_KEY}" == "" ]; then
         echo "SSH key was not specified."
