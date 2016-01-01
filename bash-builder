@@ -52,78 +52,86 @@ if [ $? != 0 ]; then
 fi
 
 while true; do
-  case "$1" in
-    -a|--all)
-      BUILD=($(get_all_projects))
-      shift
-    ;;
+  if [ "${TAKE_ARGS}" == "0" ]; then
+    case "$1" in
+      -a|--all)
+        BUILD=($(get_all_projects))
+        shift
+      ;;
 
-    -c|--clean)
-      BUILD_CLEAN="1"
-      shift
-    ;;
+      -c|--clean)
+        BUILD_CLEAN="1"
+        shift
+      ;;
 
-    -d|--dir)
-      DIR_TARGET="$2"
-      shift 2
-    ;;
+      -d|--dir)
+        DIR_TARGET="$2"
+        shift 2
+      ;;
 
-    -h|--help)
-      task_usage
-      shift
-      exit 0
-    ;;
+      -h|--help)
+        task_usage
+        shift
+        exit 0
+      ;;
 
-    -i|--ident)
-      PATH_SSH_KEY="$2"
-      shift 2
-    ;;
+      -i|--ident)
+        PATH_SSH_KEY="$2"
+        shift 2
+      ;;
 
-    -k|--keep)
-      BUILD_KEEP="1"
-      shift
-    ;;
+      -k|--keep)
+        BUILD_KEEP="1"
+        shift
+      ;;
 
-    -l|--list)
-      get_all_projects
-      shift
-      exit 0
-    ;;
+      -l|--list)
+        get_all_projects
+        shift
+        exit 0
+      ;;
 
-    -o|--on)
-      BUILD_SERVE="$2"
-      shift 2;
-    ;;
+      -o|--on)
+        BUILD_SERVE="$2"
+        shift 2;
+      ;;
 
-    -r|--run)
-      BUILD_RUN="1"
-      shift
-    ;;
+      -r|--run)
+        BUILD_RUN="1"
+        shift
+      ;;
 
-    -w|--work)
-      touch ${FILE_ANCHOR}
-      exit 0
-      shift
-    ;;
+      -w|--work)
+        touch ${FILE_ANCHOR}
+        exit 0
+        shift
+      ;;
 
-    --)
-      TAKE_ARGS="1"
-      shift
-    ;;
+      --)
+        TAKE_ARGS="1"
+        shift
+      ;;
 
-    *)
-      if [ "$1" == "" ]; then
-        break
-      fi
+      *)
+        if [ "$1" == "" ]; then
+          break
+        fi
 
-      if [ "${TAKE_ARGS}" == "0" ]; then
         BUILD+=($1)
-      else
+        shift
+      ;;
+    esac
+  else
+    case "$1" in
+      *)
+        if [ "$1" == "" ]; then
+          break
+        fi
+
         PASS_ARGS+=("$1")
-      fi
-      shift
-    ;;
-  esac
+        shift
+    esac
+  fi
 done
 
 if [ "${#BUILD[@]}" == "0" ]; then
@@ -204,7 +212,11 @@ for project in ${BUILD[@]}; do
     if [ "${BUILD_RUN}" == "1" ]; then
       echo ":: Running ${project}"
       target=$(get_project_target "${project}")
-      ${target} ${PASS_ARGS[@]}
+      cmd="${target} ${PASS_ARGS[@]}"
+      ${cmd}
+
+      result=$?
+      exit ${result}
     fi
 
     if [ "${BUILD_SERVE}" != "" ]; then
