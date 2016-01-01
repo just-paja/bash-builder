@@ -157,7 +157,7 @@ function project_build {
 
     echo >> ${FILE_TARGET}
     get_archive_mark "${type}" "${path}" >> ${FILE_TARGET}
-    cat ${file} >> ${FILE_TARGET}
+    cat ${file} | escape_archive_marks >> ${FILE_TARGET}
   done
 
   chmod +x ${FILE_TARGET}

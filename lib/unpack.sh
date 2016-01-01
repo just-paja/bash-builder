@@ -15,7 +15,7 @@ export ARCHIVE_MARK_REGEX="\-\-\[:archive:(.+):(.+):\]\-\-"
 ###
 function list_archive_marks {
   file="$1"
-  found=$(grep -anE "${ARCHIVE_MARK_REGEX}" "$file")
+  found=$(grep -anE "^###${ARCHIVE_MARK_REGEX}" "$file")
   parsed=""
 
   for mark in $found; do
@@ -34,6 +34,19 @@ function list_archive_marks {
   return $?
 }
 
+
+function unescape_archive_marks {
+  IFS=''
+  cat | while read -r data; do
+    match=$(echo $data | grep -aE "###--###${ARCHIVE_MARK_REGEX}" | wc -l)
+
+    if [ "${match}" == "0" ]; then
+      echo "${data}"
+    else
+      echo "${data:5}"
+    fi
+  done
+}
 
 export SCRIPT_FILE=$(basename "$0")
 export SCRIPT_NAME=${SCRIPT_FILE%.*}
@@ -75,7 +88,7 @@ for mark in $marks; do
 
   cmd="${cmd}p"
   run_task mkdir -p $(dirname ${DIR_HOME}/${path})
-  run_task sed -n "${cmd}" $0 > "${DIR_HOME}/${path}"
+  run_task sed -n "${cmd}" $0 | unescape_archive_marks > "${DIR_HOME}/${path}"
 
   # TODO: Rewrite into archive lib, so it keeps +x
   if [[ "${path}" == *".sh" ]]; then

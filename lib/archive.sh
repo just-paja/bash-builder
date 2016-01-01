@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export ARCHIVE_MARK_TEMPLATE="###--[:archive:{type}:{path}:]--"
+export ARCHIVE_MARK_REGEX="###\-\-\[:archive:(.+):(.+):\]\-\-"
 
 
 ###
@@ -100,6 +101,21 @@ function create_inline_source {
 }
 
 
+
+function escape_archive_marks {
+  IFS=''
+  cat | while read -r data; do
+    match=$(echo $data | grep -aE "${ARCHIVE_MARK_REGEX}" | wc -l)
+
+    if [ "${match}" == "0" ]; then
+      echo "${data}"
+    else
+      echo "###--${data}"
+    fi
+  done
+}
+
 export -f get_file_type
 export -f get_archive_mark
 export -f create_inline_source
+export -f escape_archive_marks
