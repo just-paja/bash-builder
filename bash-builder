@@ -9,6 +9,7 @@ BUILD_SERVE=""
 PATH_SSH_KEY=""
 
 DIR_ROOT="$(dirname "$(readlink -f "$0")")"
+DIR_TARGET="${DIR_ROOT}/target"
 
 TAKE_ARGS="0"
 PASS_ARGS=()
@@ -20,6 +21,7 @@ function task_usage {
   echo
   echo " -a|--all   Build all"
   echo " -c|--clean Run only clean, no build"
+  echo " -d|--dir   Output to this directory"
   echo " -h|--help  Show usage (this)"
   echo " -i|--ident Identity file path"
   echo " -l|--list  List all available"
@@ -43,7 +45,7 @@ if [ "$#" -eq 0 ]; then
   exit 0
 fi
 
-PARAMS=$(getopt -n $0 -o "achi:klo:rw" --long "all,clean,help,ident:,keep,list,on:,run,work" -- "$@")
+PARAMS=$(getopt -n $0 -o "acd:hi:klo:rw" --long "all,clean,dir:,help,ident:,keep,list,on:,run,work" -- "$@")
 
 if [ $? != 0 ]; then
   exit 3;
@@ -59,6 +61,11 @@ while true; do
     -c|--clean)
       BUILD_CLEAN="1"
       shift
+    ;;
+
+    -d|--dir)
+      DIR_TARGET="$2"
+      shift 2
     ;;
 
     -h|--help)
@@ -153,23 +160,36 @@ for project in ${BUILD[@]}; do
       exit $?
     fi
 
-    DEPS=$(get_projejct_deps "${project}")
+    DEPS_DYNAMIC=$(get_project_deps "${project}")
+    DEPS_STATIC=$(get_project_deps_static "${project}")
 
     echo ">> Building dependencies for ${project}"
     project_collect_inlines ${project}
 
-    if [ "${DEPS}" != "" ]; then
-      tmpdir=$(get_project_tmp_dir "${project}")
-      tmpdir="${tmpdir}/inline"
+    for DEPS_TYPE in "DEPS_DYNAMIC" "DEPS_STATIC"; do
+      DEPS=${!DEPS_TYPE}
+      DEPS_RUN=""
+      DEPS_TARGET=""
 
-      if [ ! -d ${tmpdir} ]; then
-        mkdir -p ${tmpdir}
+      if [ "${DEPS_TYPE}" == "DEPS_DYNAMIC" ]; then
+        DEPS_RUN="-r"
+      else
+        DEPS_TARGET="-d $(get_project_tmp_dir ${project})/inline/inline/shell"
       fi
 
-      for dep in ${DEPS}; do
-        ${DIR_ROOT}/bash-builder -r ${dep} -- $tmpdir
-      done
-    fi
+      if [ "${DEPS}" != "" ]; then
+        tmpdir=$(get_project_tmp_dir "${project}")
+        tmpdir="${tmpdir}/inline"
+
+        if [ ! -d ${tmpdir} ]; then
+          mkdir -p ${tmpdir}
+        fi
+
+        for dep in ${DEPS}; do
+          ${DIR_ROOT}/bash-builder ${DEPS_RUN} ${DEPS_TARGET} ${dep} -- $tmpdir
+        done
+      fi
+    done
 
     echo ">> Building ${project}"
     run_task project_build "${project}"

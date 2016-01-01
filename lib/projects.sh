@@ -2,7 +2,6 @@
 
 DIR_TMP="/var/tmp/bash-build"
 DIR_LIB="${DIR_ROOT}/lib"
-DIR_TARGET="${DIR_ROOT}/target"
 FILE_ANCHOR=".bash-builder"
 
 function get_root {
@@ -74,28 +73,39 @@ function get_project_tmp_dir {
   echo "${DIR_TMP}/${1}"
 }
 
+function get_project_target_dir {
+  echo ${DIR_TARGET}
+}
+
 function get_project_target {
   project_root=$(get_project_root "$1")
-  root=$(get_root)
-  target=$root/target
   . ${project_root}/meta
 
-  if [ ! -e ${target} ]; then
-    mkdir ${target}
+  dir=$(get_project_target_dir "${1}")
+
+  if [ ! -d ${dir} ]; then
+    mkdir ${dir}
   fi
 
-  echo "${target}/${1}-${VERSION}.sh"
+  echo "${dir}/${1}-${VERSION}.sh"
 }
 
 function project_exists {
   find_project_root "$1" | wc -l
 }
 
-function get_projejct_deps {
+function get_project_deps {
   root=$(get_project_root $1)
   . ${root}/meta
 
   echo "${REQUIRE_PROJECTS}"
+}
+
+function get_project_deps_static {
+  root=$(get_project_root $1)
+  . ${root}/meta
+
+  echo "${REQUIRE_PROJECTS_STATIC}"
 }
 
 
@@ -166,6 +176,8 @@ export -f find_project_root
 export -f get_root
 export -f get_all_project_sources
 export -f get_all_projects
+export -f get_project_deps
+export -f get_project_deps_static
 export -f get_project_root
 export -f get_project_target
 export -f get_project_tmp_dir
