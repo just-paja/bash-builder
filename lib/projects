@@ -28,7 +28,9 @@ function get_all_project_sources {
   echo "${src}/projects"
 
   if [ "${src}" != "${DIR_ROOT}" ]; then
-    echo "${DIR_ROOT}/projects"
+    if [ -e "${DIR_ROOT}/projects}" ]; then
+      echo "${DIR_ROOT}/projects"
+    fi
   fi
 }
 
@@ -36,7 +38,9 @@ function get_all_projects {
   src=$(get_all_project_sources)
 
   for dir in ${src}; do
-    find ${dir} -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort
+    if [ -d ${dir} ]; then
+      find ${dir} -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | sort
+    fi
   done
 }
 
