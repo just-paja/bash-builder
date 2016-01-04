@@ -9,7 +9,7 @@ BUILD_SERVE=""
 PATH_SSH_KEY=""
 
 DIR_ROOT="$(dirname "$(readlink -f "$0")")"
-DIR_TARGET="${DIR_ROOT}/target"
+DIR_TARGET=$(pwd)
 
 TAKE_ARGS="0"
 PASS_ARGS=()
