@@ -36,9 +36,9 @@ function task_usage {
 }
 
 
-. ${DIR_ROOT}/lib/archive.sh
-. ${DIR_ROOT}/lib/tasks.sh
-. ${DIR_ROOT}/lib/projects.sh
+. ${DIR_ROOT}/lib/archive
+. ${DIR_ROOT}/lib/tasks
+. ${DIR_ROOT}/lib/projects
 
 if [ "$#" -eq 0 ]; then
   task_usage
