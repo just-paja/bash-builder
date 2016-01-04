@@ -7,14 +7,16 @@ PROJECT_MAINTAINER=$(git --no-pager show -s --format='%an <%ae>' HEAD)
 echo "version: ${PROJECT_VERSION}"
 echo "Maintainer: ${PROJECT_MAINTAINER}"
 
+NAME_BASE="bash-builder_${PROJECT_VERSION}"
 DIR_ROOT="$(dirname "$(readlink -f "$0")")"
 DIR_SRC=$(realpath ${DIR_ROOT}/..)
 
 DIR_TEMP=$(mktemp -d)
-DIR_DEBIAN="${DIR_TEMP}/DEBIAN"
-DIR_BIN="${DIR_TEMP}/usr/bin"
-DIR_DOC="${DIR_TEMP}/usr/share/doc/bash-builder"
-DIR_SHARE="${DIR_TEMP}/usr/share/bash-builder"
+DIR_BASE="${DIR_TEMP}/${NAME_BASE}"
+DIR_DEBIAN="${DIR_BASE}/DEBIAN"
+DIR_BIN="${DIR_BASE}/usr/bin"
+DIR_DOC="${DIR_BASE}/usr/share/doc/bash-builder"
+DIR_SHARE="${DIR_BASE}/usr/share/bash-builder"
 
 # Copy over bash things
 mkdir -p ${DIR_DEBIAN} ${DIR_BIN} ${DIR_DOC} ${DIR_SHARE}
@@ -34,14 +36,17 @@ for file in ${DIR_DEBIAN}/*; do
 done
 
 git log > ${DIR_DOC}/changelog
-gzip -9 ${DIR_DOC}/changelog
-chmod 644 ${DIR_DOC}/changelog.gz
+gzip -n -9 ${DIR_DOC}/changelog
+chmod 644 ${DIR_DOC}/changelog*
 
 # Create executable
 ln -s ../share/bash-builder/bash-builder ${DIR_BIN}/bash-builder
 
-chown -R root:root ${DIR_SHARE}
-dpkg-deb --build ${DIR_TEMP}
+# Package it
+fakeroot dpkg-deb --build ${DIR_BASE}
+mv ${DIR_TEMP}/*.deb ./
 
-echo ${DIR_TEMP}
+# Remove temporary files
 rm -rf ${DIR_TEMP}
+
+ls ./*.deb

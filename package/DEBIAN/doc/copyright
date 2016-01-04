@@ -1,3 +1,6 @@
+Author: just-paja <just.paja@gmail.com>
+Download: https://github.com/just-paja/bash-builder
+
 Files: *
-Copyright: 2014-2015 {MAINTAINER}
-License: /usr/share/common-licenses/GPL-2
+Copyright: {MAINTAINER}
+License: MIT
