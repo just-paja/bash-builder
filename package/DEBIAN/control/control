@@ -1,0 +1,11 @@
+Package: bash-builder
+Version: {VERSION}
+Section: devel
+Priority: optional
+Architecture: amd64
+Depends: bash (>= 4.2.0)
+Installed-Size: 9216
+Maintainer: {MAINTAINER}
+Description: Create executable install scripts
+ Tiny tool that helps you quickly create bash install scripts for your
+ servers
