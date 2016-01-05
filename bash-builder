@@ -182,7 +182,7 @@ for project in ${BUILD[@]}; do
       if [ "${DEPS_TYPE}" == "DEPS_DYNAMIC" ]; then
         DEPS_RUN="-r"
       else
-        DEPS_TARGET="-d $(get_project_tmp_dir ${project})/inline/inline/shell"
+        DEPS_TARGET="-d $(get_project_tmp_dir ${project})/inline/shell"
       fi
 
       if [ "${DEPS}" != "" ]; then
