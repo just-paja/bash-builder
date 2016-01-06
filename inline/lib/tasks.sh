@@ -17,9 +17,7 @@ function is_ok {
 }
 
 function run_task {
-  task=$@
-
-  ${task}
+  run_task_routine "$@"
   result=$?
   ok=$(is_ok ${result})
 
@@ -31,6 +29,12 @@ function run_task {
   fi
 }
 
+function run_task_routine {
+  task=$@
+  ${task}
+  return $?
+}
+
 ###
 # Run generic task and log its output. Do not care about exit codes
 # @params string Command with arguments
@@ -39,11 +43,26 @@ function log_task_routine {
   FILE_LOG_TMP=$(mktemp)
 
   # The file will contains only output for this command
-  run_task "$@" &> ${FILE_LOG_TMP}
+  run_task_routine "$@" &> ${FILE_LOG_TMP}
+  result=$?
+  ok=$(is_ok ${result})
+
+  if [ "${FILE_LOG}" == "" ]; then
+    echo "Please supply FILE_LOG environment variable pointing to your log" >&2
+    exit 1
+  fi
 
   # If command went trough, save its output
   cat ${FILE_LOG_TMP} >> ${FILE_LOG}
   rm ${FILE_LOG_TMP}
+
+  if [ "${ok}" != "yes" ]; then
+    cat ${FILE_LOG} >&2
+    echo "This log is preserved in ${FILE_LOG}" >&2
+    exit ${result}
+  fi
+
+  return $res
 }
 
 ###
