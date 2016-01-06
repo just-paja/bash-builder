@@ -62,7 +62,7 @@ function log_task_routine {
     exit ${result}
   fi
 
-  return $res
+  return ${result}
 }
 
 ###
@@ -96,3 +96,4 @@ export -f log_task_routine
 export -f log_task
 export -f run_sequence
 export -f run_task
+export -f run_task_routine
