@@ -1,0 +1,3 @@
+Some text with replaced ${variable} and value ${value}
+Some text with \backslash
+Some text with \\two backslashes
