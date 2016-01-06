@@ -25,6 +25,7 @@ chmod -R 755 ${DIR_TEMP}
 cp README.md ${DIR_SHARE}
 cp bash-builder ${DIR_SHARE}
 cp -R lib ${DIR_SHARE}
+cp -R inline ${DIR_SHARE}
 
 # Update Ubuntu package control files
 cp -R package/DEBIAN/control/* ${DIR_DEBIAN}
