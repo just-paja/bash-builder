@@ -13,7 +13,7 @@ function replace_vars {
   replace=(${*:2})
   IFS=" "
 
-  while read line; do
+  while read -r line; do
     for var in ${replace[@]}; do
       varName=$(escapeName "${var}")
       varValue=$(escapeValue "${!var}")
