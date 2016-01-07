@@ -104,5 +104,5 @@ fi
 "${DIR_EXTRACT}/inline/${FILE_MAIN}" $@
 result=$?
 
-run_task rm -rf ${DIR_EXTRACT}
+run_task rm -rf ${DIR_EXTRACT} &
 exit ${result}
