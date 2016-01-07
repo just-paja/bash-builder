@@ -51,21 +51,13 @@ function unescape_archive_marks {
 export SCRIPT_FILE=$(basename "$0")
 export SCRIPT_NAME=${SCRIPT_FILE%.*}
 
-export DIR_EXTRACT="/var/tmp/bash-builder/bash/${SCRIPT_NAME}"
-export DIR_EXTRACT=$(mktemp)
+export DIR_EXTRACT=$(mktemp -d)
 export DIR_HOME="${DIR_EXTRACT}/inline"
 
 DIR_INLINE="${DIR_EXTRACT}/inline"
 DIR_SCRIPTS="${DIR_HOME}/scripts"
 FILE_META="${DIR_HOME}/meta"
 FILE_PACK="${DIR_HOME}/package.tar"
-
-
-if [ -e ${DIR_EXTRACT} ]; then
-  run_task rm -rf ${DIR_EXTRACT}
-fi
-
-run_task mkdir -p ${DIR_EXTRACT}
 
 marks=$(list_archive_marks $0)
 
@@ -113,4 +105,4 @@ fi
 result=$?
 
 run_task rm -rf ${DIR_EXTRACT}
-exit $?
+exit ${result}
