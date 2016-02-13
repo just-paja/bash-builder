@@ -3,10 +3,10 @@
 ALLOWED_EXIT_CODES=("0")
 
 function is_ok {
-  result=${1}
+  is_ok_result=${1}
 
   for code in ${ALLOWED_EXIT_CODES[@]}; do
-    if [ "${result}" == "${code}" ]; then
+    if [ "${is_ok_result}" == "${code}" ]; then
       echo 'yes'
       return 0
     fi
@@ -18,14 +18,14 @@ function is_ok {
 
 function run_task {
   run_task_routine "$@"
-  result=$?
-  ok=$(is_ok ${result})
+  run_task_result=$?
+  ok=$(is_ok ${run_task_result})
 
   # Kill the script if it didn't
   if [ "${ok}" != "yes" ]; then
-    echo "Task has failed with exit code ${result}" 1>&2
+    echo "Task has failed with exit code ${run_task_result}" 1>&2
     echo "${task}" 1>&2
-    exit ${result}
+    exit ${run_task_result}
   fi
 }
 
@@ -44,8 +44,8 @@ function log_task_routine {
 
   # The file will contains only output for this command
   run_task_routine "$@" &> ${FILE_LOG_TMP}
-  result=$?
-  ok=$(is_ok ${result})
+  run_task_routine_result=$?
+  ok=$(is_ok ${run_task_routine_result})
 
   if [ "${FILE_LOG}" == "" ]; then
     echo "Please supply FILE_LOG environment variable pointing to your log" >&2
@@ -59,10 +59,10 @@ function log_task_routine {
   if [ "${ok}" != "yes" ]; then
     cat ${FILE_LOG} >&2
     echo "This log is preserved in ${FILE_LOG}" >&2
-    exit ${result}
+    exit ${run_task_routine_result}
   fi
 
-  return ${result}
+  return ${run_task_routine_result}
 }
 
 ###
@@ -80,11 +80,11 @@ function run_sequence {
     echo ">> $(basename $command)"
 
     ${command}
-    result=$?
-    ok=$(is_ok ${result})
+    run_sequence_result=$?
+    ok=$(is_ok ${run_sequence_result})
 
     if [ "${ok}" != "yes" ]; then
-      return ${result}
+      return ${run_sequence_result}
     fi
   done
 

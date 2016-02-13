@@ -4,12 +4,12 @@ function run_task {
   task=$@
 
   ${task}
-  result=$?
+  local_run_task_result=$?
 
-  if [ "${result}" != "0" ]; then
-    echo "Task has failed with exit code ${result}" 1>&2
+  if [ "${local_run_task_result}" != "0" ]; then
+    echo "Task has failed with exit code ${local_run_task_result}" 1>&2
     echo "${task}" 1>&2
-    exit ${result}
+    exit ${local_run_task_result}
   fi
 }
 

@@ -102,7 +102,7 @@ fi
 
 # Run the composed script
 "${DIR_EXTRACT}/inline/${FILE_MAIN}" $@
-result=$?
+main_script_exit_status=$?
 
-run_task rm -rf ${DIR_EXTRACT} &
-exit ${result}
+run_task rm -rf ${DIR_EXTRACT}
+exit ${main_script_exit_status}
